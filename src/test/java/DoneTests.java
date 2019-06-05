@@ -10,6 +10,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Execution(ExecutionMode.CONCURRENT)
 class DoneTests {
@@ -48,21 +50,21 @@ class DoneTests {
     System.out.println(Thread.currentThread().getName());
 
     // SHOWS THE ISSUE
-//    ForkJoinPool customThreadPool = new ForkJoinPool(4);
-//    RecursiveAction a = new RecursiveAction() {
-//      @Override
-//      protected void compute() {
-//        while (true) {
-//          try {
-//            Thread.sleep(1000);
-//          } catch (InterruptedException e) {
-//            e.printStackTrace();
-//          }
-//          System.out.println(id + " -> " + Thread.currentThread().getName());
-//        }
-//      }
-//    };
-//    customThreadPool.invoke(a);
+    ForkJoinPool customThreadPool = new ForkJoinPool(4);
+    RecursiveAction a = new RecursiveAction() {
+      @Override
+      protected void compute() {
+        while (true) {
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
+          System.out.println(id + " -> " + Thread.currentThread().getName());
+        }
+      }
+    };
+    customThreadPool.invoke(a);
 
     // WORKS AS EXPECTED
 //    try {
@@ -72,24 +74,37 @@ class DoneTests {
 //    }
 
     // WORKS AS EXPECTED
-    ExecutorService service = Executors.newFixedThreadPool(4);
-    Callable<Void> a = () -> {
-      while (true) {
-        try {
-          Thread.sleep(1000);
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-        System.out.println(id + " -> " + Thread.currentThread().getName());
-      }
-    };
-    try {
-      service.invokeAll(List.of(a));
-      service.shutdown();
-      service.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
+//    ExecutorService service = Executors.newFixedThreadPool(4);
+//    Callable<Void> a = () -> {
+//      while (true) {
+//        try {
+//          Thread.sleep(1000);
+//        } catch (InterruptedException e) {
+//          e.printStackTrace();
+//        }
+//        System.out.println(id + " -> " + Thread.currentThread().getName());
+//      }
+//    };
+//    try {
+//      service.invokeAll(List.of(a));
+//      service.shutdown();
+//      service.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
+//    } catch (InterruptedException e) {
+//      e.printStackTrace();
+//    }
+
+    // WORKS AS EXPECTED
+//    IntStream.iterate(0, n -> n + 2).limit(10).parallel().forEach(
+//        i -> {
+//          try {
+//            Thread.sleep(1000);
+//          } catch (InterruptedException e) {
+//            e.printStackTrace();
+//          }
+//          System.out.println(id + " -> " + Thread.currentThread().getName() + ": " + i);
+//
+//        }
+//    );
 
     System.out.println("DONE " + id);
   }
